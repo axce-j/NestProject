@@ -22,9 +22,9 @@ class Posts {
   @Expose()
   @Column()
   public content: string;
-  @Expose()
-  @Column({ nullable: true })
-  public category?: string;
+  // @Expose()
+  // @Column({ nullable: true })
+  // public category?: string;
   @Expose()
   @ManyToOne(() => Users, (author: Users) => author.posts)
   public author: Users;

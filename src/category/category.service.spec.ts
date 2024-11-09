@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { Category } from './category';
+import { Category } from './category.service';
 
 describe('Category', () => {
   let provider: Category;

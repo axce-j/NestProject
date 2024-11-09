@@ -1,3 +1,4 @@
+// import Posts from 'src/post/post.entity';
 import Posts from 'src/post/post.entity';
 import { Column, Entity, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
 

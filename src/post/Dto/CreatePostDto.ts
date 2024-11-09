@@ -13,4 +13,7 @@ export class CreatePostDto {
   @IsNotEmpty()
   @IsOptional()
   title: string;
+
+  @IsNumber()
+  catgeories: number;
 }
