@@ -14,14 +14,16 @@ import Posts from 'src/post/post.entity';
 @Entity()
 class Users {
   @PrimaryGeneratedColumn()
-  @Exclude()
+  // @Exclude()
+  @Expose()
   public id: number;
 
-  @Column('varchar', { nullable: true })
+  @Column('varchar')
   @Expose()
   public name: string;
 
   @Column('text', { nullable: true })
+  @Expose()
   public content: string;
 
   @Column({ nullable: true })
@@ -30,6 +32,7 @@ class Users {
       return value;
     }
   })
+  @Exclude()
   public category: string;
 
   @Column({ unique: true })
@@ -47,11 +50,12 @@ class Users {
     eager: true,
     cascade: true,
   })
-  @Expose()
   @JoinColumn()
+  @Expose()
   public address: Address;
 
-  @OneToMany(() => Posts, (post: Posts) => post.author)
+  @OneToMany(() => Posts, (post: Posts) => post.author, { eager: true })
+  @Exclude()
   public posts: Posts[];
 }
 

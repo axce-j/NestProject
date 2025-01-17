@@ -4,7 +4,6 @@ import { Users23Service } from '../users/users23.service';
 import * as bcrypt from 'bcrypt';
 import { error } from 'console';
 import { RegistrationDto } from 'src/users/dto/register-user.dto';
-import { postgresErrorCode } from 'src/database/postgresErrorCodes.enum';
 import { TokenPayload } from './tokenPayload.interface';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
@@ -18,27 +17,19 @@ export class AuthenticationService {
   ) {}
 
   public async registerUser(registerdto: RegistrationDto) {
-    const hashedpassword = await bcrypt.hash(registerdto.password, 10);
     try {
-      // console.log(registerdto);
+      const hashedpassword = await bcrypt.hash(registerdto.password, 10);
 
       const createdUser = await this.user23Service.create({
         ...registerdto,
         password: hashedpassword,
       });
 
-      // createdUser.password = undefined;
       return createdUser;
     } catch (error) {
-      if (error === postgresErrorCode.UniqueViolation) {
-        throw new HttpException(
-          'already existing email',
-          HttpStatus.BAD_REQUEST,
-        );
-      }
-
+      console.error('Error in AuthenticationService.registerUser:', error);
       throw new HttpException(
-        'internal server error',
+        'Registration failed. Please try again later. ',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
@@ -57,7 +48,7 @@ export class AuthenticationService {
     }
   }
   async verifyPassword(plaintextPassword: string, hashedPassword: string) {
-    const IsPasswordMatching = bcrypt.compare(
+    const IsPasswordMatching = await bcrypt.compare(
       plaintextPassword,
       hashedPassword,
     );

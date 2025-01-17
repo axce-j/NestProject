@@ -6,6 +6,8 @@ import {
   Controller,
   Get,
   HttpCode,
+  HttpException,
+  HttpStatus,
   Post,
   Req,
   Res,
@@ -44,11 +46,17 @@ export class AuthenticationController {
   }
 
   @UseGuards(jwtAuthenticationGuard)
+  @UseInterceptors(ClassSerializerInterceptor)
   @Get()
-  authentictae(@Res() request: RequestWithUser) {
+  @SerializeOptions({
+    strategy: 'excludeAll',
+  })
+  authenticate(@Req() request: RequestWithUser) {
     const { user } = request;
-    // user.password = undefined;
-    return user;
+    if (!user) {
+      throw new HttpException('User not found', HttpStatus.UNAUTHORIZED);
+    }
+    return user; // Alternatively, you can use `response.json(user)` if using @Res
   }
 
   @UseGuards(jwtAuthenticationGuard)

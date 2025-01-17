@@ -1,7 +1,12 @@
 import { CreateUserDto } from './dto/create-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import Users from './entities/users.entity';
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  HttpException,
+  HttpStatus,
+  Injectable,
+} from '@nestjs/common';
 import { Repository } from 'typeorm';
 
 @Injectable()
@@ -10,6 +15,7 @@ export class Users23Service {
     @InjectRepository(Users)
     private usersRepository: Repository<Users>,
   ) {}
+
   async getByEmail(email: string) {
     console.log(email);
 
@@ -36,11 +42,22 @@ export class Users23Service {
 
   async create(userData: CreateUserDto) {
     try {
-      const newUser = await this.usersRepository.create(userData);
+      const doesUserExist = await this.usersRepository.findOneBy({
+        email: userData?.email,
+      });
+
+      if (doesUserExist) {
+        throw new ConflictException('user already exist');
+      }
+      const newUser = this.usersRepository.create(userData);
       await this.usersRepository.save(newUser);
       return newUser;
-    } catch (errror) {
-      console.log(errror);
+    } catch (error) {
+      console.error('Error in Users23Service.create:', error);
+      throw new HttpException(
+        'Failed to create user. Please try again later.',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 }
