@@ -3,20 +3,37 @@ import {
   IsString,
   IsEmail,
   IsStrongPassword,
+  IsEnum,
 } from 'class-validator';
+import { Expose } from 'class-transformer';
 
-/* eslint-disable prettier/prettier */
-export class CreateUserDto{
+// Define an Enum for roles
+export enum Role {
+  SUPERADMIN = 'SUPERADMIN',
+  STUDENT = 'STUDENT',
+  LECTURER = 'LECTURER',
+}
 
-    @IsNotEmpty()
-    @IsString()
-    name:string;
+export class CreateUserDto {
+  @IsNotEmpty()
+  @IsString()
+  @Expose()
+  firstName: string;
 
-    @IsEmail()
-    email:string; 
+  @IsNotEmpty()
+  @IsString()
+  @Expose()
+  lastName: string;
 
-     
+  @IsEmail()
+  @Expose()
+  email: string;
 
-    @IsStrongPassword()
-    password:string;
+  @IsStrongPassword()
+  @Expose()
+  password: string;
+
+  @IsEnum(Role) // Ensure role is one of the allowed values
+  @Expose()
+  role: Role;
 }

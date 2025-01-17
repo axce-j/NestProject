@@ -1,8 +1,6 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { Users23Service } from '../users/users23.service';
-// import { string } from "joi";
 import * as bcrypt from 'bcrypt';
-import { error } from 'console';
 import { RegistrationDto } from 'src/users/dto/register-user.dto';
 import { TokenPayload } from './tokenPayload.interface';
 import { JwtService } from '@nestjs/jwt';
@@ -16,51 +14,115 @@ export class AuthenticationService {
     private readonly configService: ConfigService,
   ) {}
 
-  public async registerUser(registerdto: RegistrationDto) {
+  // Normal user registration
+  public async registerUser(registerDto: RegistrationDto) {
     try {
-      const hashedpassword = await bcrypt.hash(registerdto.password, 10);
+      const hashedPassword = await bcrypt.hash(registerDto.password, 10);
+      const role = registerDto.role;
 
       const createdUser = await this.user23Service.create({
-        ...registerdto,
-        password: hashedpassword,
+        ...registerDto,
+        password: hashedPassword,
+        role: role,
       });
 
       return createdUser;
     } catch (error) {
       console.error('Error in AuthenticationService.registerUser:', error);
       throw new HttpException(
-        'Registration failed. Please try again later. ',
+        'Registration failed. Please try again later.',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
 
-  public async authenticatePassword(email: string, plaintextPassword: string) {
-    const user = await this.user23Service.getByEmail(email);
+  // Biometric registration for students
+  public async registerBiometricData(
+    userId: number,
+    biometricData: { faceId?: string; fingerprintId?: string },
+  ) {
+    // Check if the user exists and has the role of STUDENT
+    const user = await this.user23Service.findOne(userId);
+    if (!user) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+    if (user.role !== 'STUDENT') {
+      throw new HttpException(
+        'Biometric registration is only available for students',
+        HttpStatus.FORBIDDEN,
+      );
+    }
+
+    // Validate biometric data
+    if (!biometricData.faceId && !biometricData.fingerprintId) {
+      throw new HttpException(
+        'At least one biometric data (face ID or fingerprint ID) must be provided',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    // Update the user with the provided biometric data
+    const updatedUser = await this.user23Service.updateUser(userId, {
+      faceId: biometricData.faceId || null,
+      fingerprintId: biometricData.fingerprintId || null,
+    });
+
+    return updatedUser;
+  }
+
+  // User authentication
+  public async authenticateUser(loginDto: {
+    matriculationId?: string;
+    schoolId?: string;
+    staffId?: string;
+    email?: string;
+    password: string;
+  }) {
+    let user = null;
+
+    if (loginDto.matriculationId) {
+      user = await this.user23Service.findOneByMatriculationId(
+        loginDto.matriculationId,
+      );
+    }
+
+    if (!user && loginDto.staffId) {
+      user = await this.user23Service.findOneByStaffId(loginDto.staffId);
+    }
+
+    if (!user && loginDto.email) {
+      user = await this.user23Service.getByEmail(loginDto.email);
+    }
+
+    if (!user) {
+      throw new HttpException('Invalid credentials', HttpStatus.UNAUTHORIZED);
+    }
 
     try {
-      this.verifyPassword(plaintextPassword, user.password);
-      // user.password = undefined;
-      // console.log(user, email);
+      await this.verifyPassword(loginDto.password, user.password);
       return user;
     } catch (error) {
-      throw new error('something went wrong with my server');
+      throw new HttpException('Invalid credentials', HttpStatus.UNAUTHORIZED);
     }
   }
-  async verifyPassword(plaintextPassword: string, hashedPassword: string) {
-    const IsPasswordMatching = await bcrypt.compare(
+
+  private async verifyPassword(
+    plaintextPassword: string,
+    hashedPassword: string,
+  ) {
+    const isPasswordMatching = await bcrypt.compare(
       plaintextPassword,
       hashedPassword,
     );
-    if (!IsPasswordMatching) {
-      throw new error('error wrong credentials used');
+    if (!isPasswordMatching) {
+      throw new HttpException('Invalid credentials', HttpStatus.UNAUTHORIZED);
     }
   }
 
-  public gatCookieWithJwtToken(id: number) {
-    const payload: TokenPayload = { id };
+  public getCookieWithJwtToken(id: number, role: string) {
+    const payload: TokenPayload = { id, role };
     const token = this.jwtService.sign(payload);
-    return `Authentication=${token};HttpOnly; Path=/; Max-Age=${this.configService.get('JWT_EXPIRATION_TIME')}`;
+    return `Authentication=${token}; HttpOnly; Path=/; Max-Age=${this.configService.get('JWT_EXPIRATION_TIME')}`;
   }
 
   public logoutByRemovingJwtToken() {

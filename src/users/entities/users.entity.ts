@@ -1,62 +1,74 @@
-import { Exclude, Expose, Transform } from 'class-transformer';
+import { Exclude, Expose } from 'class-transformer';
 import {
   Column,
   CreateDateColumn,
   Entity,
-  JoinColumn,
-  OneToMany,
-  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import Address from './address.entity';
-import Posts from 'src/post/post.entity';
 
 @Entity()
-class Users {
+export class Users {
   @PrimaryGeneratedColumn()
-  // @Exclude()
   @Expose()
   public id: number;
 
   @Column('varchar')
   @Expose()
-  public name: string;
+  public firstName: string;
 
-  @Column('text', { nullable: true })
+  @Column('varchar')
   @Expose()
-  public content: string;
-
-  @Column({ nullable: true })
-  @Transform((value) => {
-    if (value !== null) {
-      return value;
-    }
-  })
-  @Exclude()
-  public category: string;
+  public lastName: string;
 
   @Column({ unique: true })
   @Expose()
   public email: string;
 
+  @Column({ nullable: true })
+  @Expose()
+  public institutionalEmail?: string;
+
   @Column()
   @Exclude()
   public password: string;
 
-  @CreateDateColumn()
-  public Date: Date;
-
-  @OneToOne(() => Address, (address) => address, {
-    eager: true,
-    cascade: true,
-  })
-  @JoinColumn()
+  @Column({ nullable: true })
   @Expose()
-  public address: Address;
+  public matriculationId?: string; // For STUDENT role
 
-  @OneToMany(() => Posts, (post: Posts) => post.author, { eager: true })
-  @Exclude()
-  public posts: Posts[];
+  @Column({ nullable: true })
+  @Expose()
+  public staffId?: string; // For LECTURER role
+
+  @Column({ nullable: true })
+  @Expose()
+  public biometricKey?: string; // For STUDENT role (Fingerprint or Face ID)
+
+  @Column('varchar', { nullable: true })
+  @Expose()
+  public city?: string;
+
+  @Column('varchar', { nullable: true })
+  @Expose()
+  public tel?: string;
+
+  @CreateDateColumn()
+  public createdAt: Date;
+
+  @Column({ nullable: true })
+  @Expose()
+  public faceId?: string;
+
+  @Column({ nullable: true })
+  @Expose()
+  public fingerprintId?: string;
+
+  // You may need a role column to distinguish between SUPERADMIN, STUDENT, and LECTURER
+  @Column({
+    type: 'enum',
+    enum: ['SUPERADMIN', 'STUDENT', 'LECTURER'],
+    default: 'STUDENT',
+  })
+  @Expose()
+  public role: 'SUPERADMIN' | 'STUDENT' | 'LECTURER';
 }
-
-export default Users;

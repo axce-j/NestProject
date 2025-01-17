@@ -1,13 +1,8 @@
-import { CreateUserDto } from './dto/create-user.dto';
+import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import Users from './entities/users.entity';
-import {
-  ConflictException,
-  HttpException,
-  HttpStatus,
-  Injectable,
-} from '@nestjs/common';
 import { Repository } from 'typeorm';
+import { CreateUserDto } from './dto/create-user.dto';
+import { Users } from './entities/users.entity';
 
 @Injectable()
 export class Users23Service {
@@ -17,47 +12,65 @@ export class Users23Service {
   ) {}
 
   async getByEmail(email: string) {
-    console.log(email);
-
-    const user = await this.usersRepository.findOneBy({ email });
-    if (user) {
-      return user;
+    const user = await this.usersRepository.findOne({ where: { email } });
+    if (!user) {
+      throw new HttpException(
+        'User with this email does not exist',
+        HttpStatus.NOT_FOUND,
+      );
     }
-    throw new HttpException(
-      'User with this email does not exist',
-      HttpStatus.NOT_FOUND,
-    );
+    return user;
   }
 
   async findOne(id: number) {
-    try {
-      console.log(id);
-
-      const user = await this.usersRepository.findOne({ where: { id } });
-      return user;
-    } catch (error) {
-      throw new HttpException('id not found', HttpStatus.NOT_FOUND);
+    const user = await this.usersRepository.findOne({ where: { id } });
+    if (!user) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }
+    return user;
+  }
+
+  async findOneByMatriculationId(matriculationId: string) {
+    const user = await this.usersRepository.findOne({
+      where: { matriculationId },
+    });
+    if (!user) {
+      throw new HttpException(
+        'User with this matriculation ID does not exist',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+    return user;
+  }
+
+  async findOneByStaffId(staffId: string) {
+    const user = await this.usersRepository.findOne({ where: { staffId } });
+    if (!user) {
+      throw new HttpException(
+        'User with this staff ID does not exist',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+    return user;
   }
 
   async create(userData: CreateUserDto) {
-    try {
-      const doesUserExist = await this.usersRepository.findOneBy({
-        email: userData?.email,
-      });
-
-      if (doesUserExist) {
-        throw new ConflictException('user already exist');
-      }
-      const newUser = this.usersRepository.create(userData);
-      await this.usersRepository.save(newUser);
-      return newUser;
-    } catch (error) {
-      console.error('Error in Users23Service.create:', error);
-      throw new HttpException(
-        'Failed to create user. Please try again later.',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+    const existingUser = await this.usersRepository.findOne({
+      where: { email: userData.email },
+    });
+    if (existingUser) {
+      throw new HttpException('User already exists', HttpStatus.CONFLICT);
     }
+
+    const newUser = this.usersRepository.create(userData);
+    await this.usersRepository.save(newUser);
+    return newUser;
+  }
+
+  // Add the updateUser method
+  async updateUser(id: number, updateData: Partial<Users>) {
+    const user = await this.findOne(id);
+    Object.assign(user, updateData); // Merge the existing user data with the new data
+    return await this.usersRepository.save(user);
   }
 }

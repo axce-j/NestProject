@@ -1,5 +1,5 @@
-import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
-import Users from './users.entity';
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+// import Users from './users.entity';
 import { Expose } from 'class-transformer';
 
 @Entity()
@@ -20,8 +20,8 @@ class Address {
   @Column()
   public street: string;
 
-  @OneToOne(() => Users, (user: Users) => user.address)
-  public user: Users;
+  // @OneToOne(() => Users, (user: Users) => user.address)
+  // public user: Users;
 }
 
 export default Address;

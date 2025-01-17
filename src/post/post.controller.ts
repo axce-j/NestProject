@@ -1,14 +1,14 @@
 import {
-  Body,
+  // Body,
   ClassSerializerInterceptor,
   //   Body,
   Controller,
   Get,
   Param,
-  Post,
-  Req,
+  // Post,
+  // Req,
   SerializeOptions,
-  UseGuards,
+  // UseGuards,
   UseInterceptors,
   //   Delete,
   //   Get,
@@ -21,10 +21,10 @@ import {
   //   ValidationPipe,
 } from '@nestjs/common';
 import { PostService } from './post.service';
-import { jwtAuthenticationGuard } from 'src/authentication/jwtAuthenticationGuard';
-import { CreatePostDto } from './Dto/CreatePostDto';
-import { RequestWithUser } from 'src/authentication/requestWithUSer';
+// import { CreatePostDto } from './Dto/CreatePostDto';
+// import { RequestWithUser } from 'src/authentication/requestWithUSer';
 import FindOneParams from 'src/utils/FindOneParams';
+// import { JwtAuthenticationGuard } from 'src/authentication/jwtAuthenticationGuard';
 
 @Controller('Posts')
 export class PostController {
@@ -54,14 +54,14 @@ export class PostController {
     return this.postService.getPostById(Number(id));
   }
 
-  @UseInterceptors(ClassSerializerInterceptor)
-  @Post()
-  @SerializeOptions({
-    strategy: 'excludeAll',
-  })
-  @UseGuards(jwtAuthenticationGuard)
-  async createPost(@Body() post: CreatePostDto, @Req() req: RequestWithUser) {
-    // console.log(req.user);
-    return this.postService.createPost(post, req.user);
-  }
+  // @UseInterceptors(ClassSerializerInterceptor)
+  // @Post()
+  // @SerializeOptions({
+  //   strategy: 'excludeAll',
+  // })
+  // @UseGuards(JwtAuthenticationGuard)
+  // async createPost(@Body() post: CreatePostDto, @Req() req: RequestWithUser) {
+  //   // console.log(req.user);
+  //   return this.postService.createPost(post, req.user);
+  // }
 }

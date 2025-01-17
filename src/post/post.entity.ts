@@ -1,12 +1,12 @@
 import { Expose } from 'class-transformer';
 import Category from 'src/category/category.entity';
-import Users from 'src/users/entities/users.entity';
+// import { Users } from 'src/users/entities/users.entity';
 import {
   Column,
   Entity,
   JoinTable,
   ManyToMany,
-  ManyToOne,
+  // ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
@@ -26,8 +26,8 @@ class Posts {
   // @Column({ nullable: true })
   // public category?: string;
   @Expose()
-  @ManyToOne(() => Users, (author: Users) => author.posts)
-  public author: Users;
+  // @ManyToOne(() => Users, (author: Users) => author.posts)
+  // public author: Users;
   @Expose()
   @ManyToMany(() => Category, (category: Category) => category.posts)
   @JoinTable()
