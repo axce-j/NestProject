@@ -13,10 +13,11 @@ import { Users } from 'src/users/entities/users.entity';
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         type: 'postgres',
-        host: configService.get('POSTGRES_HOST'),
-        username: configService.get('POSTGRES_USER'),
-        password: configService.get('POSTGRES_PASSWORD'),
-        database: configService.get('POSTGRES_DB'),
+        // host: configService.get('POSTGRES_HOST'),
+        // username: configService.get('POSTGRES_USER'),
+        // password: configService.get('POSTGRES_PASSWORD'),
+        // database: configService.get('POSTGRES_DB'),
+        url: configService.get('RENDER_URL'),
         entities: [
           __dirname + '/../**/*.entity.ts',
           Users,
@@ -25,6 +26,9 @@ import { Users } from 'src/users/entities/users.entity';
           Category,
         ],
         synchronize: true,
+        ssl: {
+          rejectUnauthorized: false, // Use this to allow self-signed certificates (if needed)
+        },
       }),
     }),
   ],
