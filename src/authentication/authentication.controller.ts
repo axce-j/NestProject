@@ -21,8 +21,10 @@ import { JwtAuthenticationGuard } from './jwtAuthenticationGuard';
 import { RequestWithUser } from './requestWithUSer';
 import { RegisterBiometricDto } from './dto/biometric.dto';
 import { LoginDto } from './dto/login.dto';
+import { ApiBody, ApiTags } from '@nestjs/swagger';
 
 @Controller('authentication')
+@ApiTags('authentication')
 export class AuthenticationController {
   constructor(private readonly authenticationService: AuthenticationService) {}
 
@@ -35,6 +37,7 @@ export class AuthenticationController {
   @UseGuards(LocalAuthenticationGuard) // This should use the updated logic in your guard
   @UseInterceptors(ClassSerializerInterceptor)
   @Post('log-in')
+  @ApiBody({ type: LoginDto })
   async logIn(
     @Body()
     payload: LoginDto,
