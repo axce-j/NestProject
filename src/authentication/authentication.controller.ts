@@ -55,6 +55,7 @@ export class AuthenticationController {
     // Return the user object (sensitive data like password can be excluded here)
     return user;
   }
+
   @UseInterceptors(ClassSerializerInterceptor)
   @UseGuards(JwtAuthenticationGuard)
   @Post('register-biometric')
@@ -71,7 +72,7 @@ export class AuthenticationController {
       );
     }
 
-    // Call the service to register biometric data
+    // Call the service to register biometric data, including the biometric key
     return await this.authenticationService.registerBiometricData(
       user.id,
       biometricData,

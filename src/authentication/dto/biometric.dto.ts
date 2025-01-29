@@ -8,4 +8,8 @@ export class RegisterBiometricDto {
   @IsOptional()
   @IsString()
   fingerprintId?: string;
+
+  @IsOptional()
+  @IsString()
+  biometricKey?: string; // Added field for storing public key
 }

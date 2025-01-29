@@ -36,10 +36,13 @@ export class AuthenticationService {
     }
   }
 
-  // Biometric registration for students
   public async registerBiometricData(
     userId: number,
-    biometricData: { faceId?: string; fingerprintId?: string },
+    biometricData: {
+      faceId?: string;
+      fingerprintId?: string;
+      biometricKey?: string;
+    },
   ) {
     // Check if the user exists and has the role of STUDENT
     const user = await this.user23Service.findOne(userId);
@@ -61,10 +64,11 @@ export class AuthenticationService {
       );
     }
 
-    // Update the user with the provided biometric data
+    // Update the user with the provided biometric data and public key
     const updatedUser = await this.user23Service.updateUser(userId, {
       faceId: biometricData.faceId || null,
       fingerprintId: biometricData.fingerprintId || null,
+      biometricKey: biometricData.biometricKey || null, // Storing the public key
     });
 
     return updatedUser;
