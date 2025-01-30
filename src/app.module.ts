@@ -8,6 +8,7 @@ import { AuthenticationModule } from './authentication/authentication.module';
 import { PostModule } from './post/post.module';
 import { CategoryModule } from './category/category.module';
 import * as Joi from 'joi';
+import { ChallengeModule } from './challenges/challenge.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import * as Joi from 'joi';
     UsersModule,
     PostModule,
     CategoryModule,
+    ChallengeModule,
   ],
   controllers: [AppController],
   providers: [AppService],
