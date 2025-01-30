@@ -5,6 +5,7 @@ import Address from 'src/users/entities/address.entity';
 import Posts from 'src/post/post.entity';
 import Category from 'src/category/category.entity';
 import { Users } from 'src/users/entities/users.entity';
+import { Challenge } from 'src/challenges/challenge.entity';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { Users } from 'src/users/entities/users.entity';
           Address,
           Posts,
           Category,
+          Challenge,
         ],
         synchronize: true,
         ssl: {
