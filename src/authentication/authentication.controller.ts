@@ -33,26 +33,23 @@ export class AuthenticationController {
   async register(@Body() registerData: RegistrationDto) {
     return this.authenticationService.registerUser(registerData);
   }
+
   @HttpCode(200)
-  @UseGuards(LocalAuthenticationGuard) // This should use the updated logic in your guard
+  @UseGuards(LocalAuthenticationGuard)
   @UseInterceptors(ClassSerializerInterceptor)
   @Post('log-in')
   @ApiBody({ type: LoginDto })
-  async logIn(
-    @Body()
-    payload: LoginDto,
-    @Req() request: any,
-  ) {
+  async logIn(@Body() payload: LoginDto, @Req() request: any) {
     const { user } = request;
 
-    // Generate JWT token after successful login
     const cookie = this.authenticationService.getCookieWithJwtToken(
       user.id,
       user.role,
+      user.matriculationId,
+      user.staffId,
     );
     request.res.setHeader('Set-Cookie', cookie);
 
-    // Return the user object (sensitive data like password can be excluded here)
     return user;
   }
 
@@ -72,7 +69,6 @@ export class AuthenticationController {
       );
     }
 
-    // Call the service to register biometric data, including the biometric key
     return await this.authenticationService.registerBiometricData(
       user.id,
       biometricData,
@@ -90,7 +86,7 @@ export class AuthenticationController {
     if (!user) {
       throw new HttpException('User not found', HttpStatus.UNAUTHORIZED);
     }
-    return user; // Alternatively, you can use `response.json(user)` if using @Res
+    return user;
   }
 
   @UseGuards(JwtAuthenticationGuard)
@@ -101,5 +97,23 @@ export class AuthenticationController {
       this.authenticationService.logoutByRemovingJwtToken(),
     );
     response.sendStatus(200);
+  }
+
+  /** 🔹 NEW VALIDATE-TOKEN ENDPOINT **/
+  @Post('validate-token')
+  async validateToken(@Body() body: { token: string }) {
+    if (!body.token) {
+      throw new HttpException('Token is required', HttpStatus.BAD_REQUEST);
+    }
+
+    const validationResult = await this.authenticationService.validateToken(
+      body.token,
+    );
+
+    if (!validationResult.isValid) {
+      throw new HttpException('Invalid token', HttpStatus.UNAUTHORIZED);
+    }
+
+    return validationResult;
   }
 }

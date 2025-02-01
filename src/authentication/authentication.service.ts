@@ -123,13 +123,68 @@ export class AuthenticationService {
     }
   }
 
-  public getCookieWithJwtToken(id: number, role: string) {
-    const payload: TokenPayload = { id, role };
+  public getCookieWithJwtToken(
+    id: number,
+    role: string,
+    matriculationId?: string,
+    staffId?: string,
+  ) {
+    const payload: TokenPayload = { id, role, matriculationId, staffId };
     const token = this.jwtService.sign(payload);
     return `Authentication=${token}; HttpOnly; Path=/; Max-Age=${this.configService.get('JWT_EXPIRATION_TIME')}`;
   }
 
   public logoutByRemovingJwtToken() {
     return `Authentication=; HttpOnly; Path=/; Age=0`;
+  }
+
+  /**
+   * Validates a JWT token.
+   * @param token The JWT token to validate.
+   * @returns An object with isValid flag and, if valid, user details.
+   */
+  public async validateToken(token: string): Promise<{
+    isValid: boolean;
+    userId?: string;
+    role?: string;
+    email?: string;
+    matriculationId?: string;
+    staffId?: string;
+  }> {
+    try {
+      // Verify token signature and expiration.
+      const payload: TokenPayload = this.jwtService.verify(token, {
+        secret: this.configService.get<string>('JWT_SECRET'),
+      });
+      console.log('Decoded JWT Payload:', payload);
+
+      let user = null;
+
+      // Fetch the user based on role
+      if (payload.role === 'STUDENT' && payload.matriculationId) {
+        user = await this.user23Service.findOneByMatriculationId(
+          payload.matriculationId,
+        );
+      } else if (payload.role === 'LECTURER' && payload.staffId) {
+        user = await this.user23Service.findOneByStaffId(payload.staffId);
+      }
+
+      // If user not found, return invalid
+      if (!user) {
+        return { isValid: false };
+      }
+      console.log('Fetched User:', user);
+
+      return {
+        isValid: true,
+        userId: user.id.toString(), // Ensuring it's returned as a string
+        role: user.role,
+        email: user.email,
+        matriculationId: user.matriculationId ?? undefined, // Return if exists
+        staffId: user.staffId ?? undefined, // Return if exists
+      };
+    } catch (error) {
+      return { isValid: false };
+    }
   }
 }
