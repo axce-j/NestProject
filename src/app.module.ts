@@ -9,6 +9,7 @@ import { PostModule } from './post/post.module';
 import { CategoryModule } from './category/category.module';
 import * as Joi from 'joi';
 import { ChallengeModule } from './challenges/challenge.module';
+import { PolygonBasedClassPerimeterModule } from './clasPerimeter/polygonBasedGeofencing/polygonClassPerimeter.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { ChallengeModule } from './challenges/challenge.module';
     PostModule,
     CategoryModule,
     ChallengeModule,
+    PolygonBasedClassPerimeterModule
   ],
   controllers: [AppController],
   providers: [AppService],
