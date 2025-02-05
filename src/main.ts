@@ -37,7 +37,7 @@ async function bootstrap() {
       'http://192.168.100.4:8081',
       'http://192.168.43.23:3000',
     ], // Allow your mobile app address
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    methods: ['GET', 'POST', 'PUT', 'UPDATE','DELETE'],
   });
 
   // Set global prefix for all routes

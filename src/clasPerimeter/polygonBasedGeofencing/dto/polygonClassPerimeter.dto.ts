@@ -1,21 +1,33 @@
-import { IsString, IsNotEmpty, IsOptional, IsNumber } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsString,
+  IsEnum,
+  IsOptional,
+  IsNumber,
+  IsArray,
+  ArrayMinSize,
+  ValidateNested,
+} from 'class-validator';
+import { Type } from 'class-transformer';
+import { PerimeterShape } from '../polygonClassPerimeter.entity';
 
 export class CreatePolygonBasedClassPerimeterDto {
   @IsString()
   @IsNotEmpty()
   name: string;
 
-  @IsString()
+  // For polygon shapes, expect an array of coordinate pairs (each pair is an array of numbers).
+  // For circle shapes, you can expect a single coordinate pair (array of two numbers).
   @IsNotEmpty()
-  coordinates: string; // GeoJSON format
+  // We'll allow either a single coordinate pair or an array of them.
+  coordinates: number[] | number[][];
 
-  @IsString()
-  @IsNotEmpty()
-  shape: string;
+  @IsEnum(PerimeterShape)
+  shape: PerimeterShape;
 
   @IsOptional()
   @IsNumber()
-  radius?: number;
+  radius?: number; // For circle
 
   @IsOptional()
   @IsNumber()
