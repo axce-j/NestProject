@@ -6,6 +6,7 @@ import Posts from 'src/post/post.entity';
 import Category from 'src/category/category.entity';
 import { Users } from 'src/users/entities/users.entity';
 import { Challenge } from 'src/challenges/challenge.entity';
+import { PolygonBasedClassPerimeter } from 'src/clasPerimeter/polygonBasedGeofencing/polygonClassPerimeter.entity';
 
 @Module({
   imports: [
@@ -26,6 +27,8 @@ import { Challenge } from 'src/challenges/challenge.entity';
           Posts,
           Category,
           Challenge,
+          PolygonBasedClassPerimeter
+
         ],
         synchronize: true,
         ssl: {

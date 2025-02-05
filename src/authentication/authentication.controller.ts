@@ -116,4 +116,9 @@ export class AuthenticationController {
 
     return validationResult;
   }
+  @UseGuards(JwtAuthenticationGuard)
+  @Get('check-biometric-key')
+  async checkBiometricKey(@Req() request: RequestWithUser) {
+    return this.authenticationService.checkBiometricKey(request.user);
+  }
 }

@@ -5,6 +5,7 @@ import { RegistrationDto } from 'src/users/dto/register-user.dto';
 import { TokenPayload } from './tokenPayload.interface';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { RequestWithUser } from './requestWithUSer';
 
 @Injectable()
 export class AuthenticationService {
@@ -72,6 +73,45 @@ export class AuthenticationService {
     });
 
     return updatedUser;
+  }
+  public async checkBiometricKey(
+    user: RequestWithUser['user'],
+  ): Promise<{ message: string }> {
+    if (!user) {
+      throw new HttpException('User not found', HttpStatus.UNAUTHORIZED);
+    }
+
+    if (user.role !== 'STUDENT') {
+      throw new HttpException(
+        'Only students can have biometric data',
+        HttpStatus.FORBIDDEN,
+      );
+    }
+
+    if (!user.matriculationId) {
+      throw new HttpException(
+        'Matriculation ID is required',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    // Fetch student by matriculation ID
+    const student = await this.user23Service.findOneByMatriculationId(
+      user.matriculationId,
+    );
+    if (!student) {
+      throw new HttpException('Student not found', HttpStatus.NOT_FOUND);
+    }
+
+    // Check if biometric key is stored
+    if (!student.biometricKey) {
+      throw new HttpException(
+        'Biometric data not registered',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    return { message: 'Biometric data found' };
   }
 
   // User authentication
